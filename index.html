@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Catalogue Films v1.1</title>
+<style>
+    :root {
+        --bg-page: #1e1f22;
+        --bg-card: #2a2c31;
+        --bg-table-header: #3a3d44;
+        --bg-table-row-alt: #2f3238;
+        --txt-main: #f5f5f5;
+        --txt-dim: #9fa4ad;
+        --accent: #4da3ff;
+        --border: #4a4d55;
+        --radius: 10px;
+        --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+        background: var(--bg-page);
+        color: var(--txt-main);
+        font-family: var(--font-stack);
+        margin: 0;
+        padding: 1rem 1rem 6rem;
+        line-height: 1.4;
+    }
+
+    header {
+        max-width: 1200px;
+        margin: 0 auto 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .title-block {
+        flex: 1 1 auto;
+        min-width: 200px;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--txt-main);
+        margin: 0 0 .25rem;
+    }
+
+    .meta-line {
+        font-size: .8rem;
+        color: var(--txt-dim);
+    }
+
+    .search-block {
+        flex: 0 0 260px;
+        max-width: 100%;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: .75rem .75rem .5rem;
+    }
+
+    .search-block label {
+        display: block;
+        font-size: .7rem;
+        font-weight: 500;
+        color: var(--txt-dim);
+        margin-bottom: .4rem;
+        letter-spacing: .03em;
+    }
+
+    #searchInput {
+        width: 100%;
+        background: #00000040;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--txt-main);
+        padding: .6rem .7rem;
+        font-size: .9rem;
+        outline: none;
+    }
+    #searchInput:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px #4da3ff33;
+    }
+
+    .stats-line {
+        font-size: .7rem;
+        color: var(--txt-dim);
+        margin-top: .5rem;
+        text-align: right;
+    }
+
+    /* FORMULAIRE AJOUT */
+    .add-block-wrapper {
+        max-width: 1200px;
+        margin: 0 auto 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .add-block {
+        flex: 1 1 340px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: .75rem .75rem .5rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,.6);
+    }
+
+    .add-block h2 {
+        margin: 0 0 .5rem;
+        font-size: .9rem;
+        font-weight: 600;
+        color: var(--txt-main);
+    }
+
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-bottom: .5rem;
+    }
+
+    .form-field {
+        flex: 1 1 140px;
+    }
+
+    .form-field label {
+        display: block;
+        font-size: .7rem;
+        font-weight: 500;
+        color: var(--txt-dim);
+        margin-bottom: .3rem;
+    }
+
+    .form-field input {
+        width: 100%;
+        background: #00000040;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--txt-main);
+        padding: .6rem .7rem;
+        font-size: .8rem;
+        outline: none;
+    }
+    .form-field input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px #4da3ff33;
+    }
+
+    .btn-row {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    button.add-film-btn {
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius);
+        padding: .6rem .9rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: #000;
+        cursor: pointer;
+    }
+
+    button.add-film-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* TABLE WRAPPER */
+    .table-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 0 20px 40px rgba(0,0,0,.6);
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 750px;
+        font-size: .9rem;
+    }
+
+    thead th {
+        position: sticky;
+        top: 0;
+        background: var(--bg-table-header);
+        color: var(--txt-main);
+        text-align: left;
+        font-weight: 600;
+        font-size: .8rem;
+        padding: .75rem .75rem;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    thead th .label-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+    }
+
+    thead th .sort-indicator {
+        font-size: .7rem;
+        color: var(--accent);
+        opacity: 0;
+        transition: opacity .15s;
+    }
+    thead th.active .sort-indicator {
+        opacity: 1;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #ffffff0a;
+    }
+
+    tbody tr:nth-child(even) {
+        background: var(--bg-table-row-alt);
+    }
+
+    tbody td {
+        padding: .7rem .75rem;
+        vertical-align: top;
+        color: var(--txt-main);
+        line-height: 1.3;
+    }
+
+    tbody td.year-col {
+        width: 4rem;
+        white-space: nowrap;
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+    }
+
+    tbody td.cat-col {
+        white-space: nowrap;
+        color: var(--txt-dim);
+        font-size: .8rem;
+    }
+
+    tbody td.del-col {
+        width: 2rem;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .del-btn {
+        background: #0000;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--txt-dim);
+        font-size: .8rem;
+        padding: .3rem .5rem;
+        line-height: 1.2;
+        cursor: pointer;
+    }
+    .del-btn:active {
+        background: #ff4d4d33;
+        border-color: #ff4d4d99;
+        color: #ff4d4d;
+    }
+
+    footer {
+        max-width: 1200px;
+        margin: 2rem auto 0;
+        font-size: .7rem;
+        color: var(--txt-dim);
+        text-align: center;
+        line-height: 1.4;
+        opacity: .8;
+    }
+
+    footer .strong {
+        color: var(--txt-main);
+        font-weight: 500;
+    }
+
+    @media (max-width: 600px) {
+        h1 {
+            font-size: 1rem;
+        }
+        thead th {
+            font-size: .7rem;
+        }
+        tbody td {
+            font-size: .8rem;
+        }
+        .add-block h2 {
+            font-size: .8rem;
+        }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="title-block">
+        <h1>Catalogue films perso</h1>
+        <div class="meta-line">Version 1.1 — hors ligne, local</div>
+        <div class="meta-line">Tri : touche l’en-tête ▸ clic répété = inverse l’ordre</div>
+    </div>
+
+    <div class="search-block">
+        <label for="searchInput">Recherche (titre / acteur / catégorie)</label>
+        <input id="searchInput" type="text" placeholder="Ex: DiCaprio, Animation, Apollo…" />
+        <div class="stats-line">
+            <span id="countShown">0</span> / <span id="countTotal">0</span> films affichés
+        </div>
+    </div>
+</header>
+
+<section class="add-block-wrapper">
+    <div class="add-block">
+        <h2>➕ Ajouter un film</h2>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="newTitle">Titre</label>
+                <input id="newTitle" type="text" placeholder="Titre complet" />
+            </div>
+            <div class="form-field">
+                <label for="newYear">Année</label>
+                <input id="newYear" type="number" inputmode="numeric" placeholder="2001" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="newActor">Acteur principal / Voix</label>
+                <input id="newActor" type="text" placeholder="Acteur ou voix" />
+            </div>
+            <div class="form-field">
+                <label for="newCat">Catégorie</label>
+                <input id="newCat" type="text" placeholder="Animation, Guerre, Docu…" />
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="add-film-btn" id="addFilmBtn">Ajouter</button>
+        </div>
+    </div>
+</section>
+
+<div class="table-wrapper">
+    <table id="filmTable">
+        <thead>
+            <tr>
+                <th data-col="title">
+                    <span class="label-wrap">
+                        <span>Titre</span>
+                        <span class="sort-indicator" data-arrow-for="title">▲</span>
+                    </span>
+                </th>
+                <th data-col="year">
+                    <span class="label-wrap">
+                        <span>Année</span>
+                        <span class="sort-indicator" data-arrow-for="year">▲</span>
+                    </span>
+                </th>
+                <th data-col="actor">
+                    <span class="label-wrap">
+                        <span>Acteur principal</span>
+                        <span class="sort-indicator" data-arrow-for="actor">▲</span>
+                    </span>
+                </th>
+                <th data-col="category">
+                    <span class="label-wrap">
+                        <span>Catégorie</span>
+                        <span class="sort-indicator" data-arrow-for="category">▲</span>
+                    </span>
+                </th>
+                <th>
+                    <span class="label-wrap">
+                        <span>Suppr</span>
+                    </span>
+                </th>
+            </tr>
+        </thead>
+        <tbody id="filmBody">
+            <!-- lignes générées par JS -->
+        </tbody>
+    </table>
+</div>
+
+<footer>
+    <div class="strong">© Pierre Charlier 2025 – Catalogue Films v1.1</div>
+    <div>Créé avec GPT-5 Thinking</div>
+</footer>
+
+<script>
+// ====== DONNÉES INITIALES ======
+let films = [
+  { title: "Wonders of the Sea", year: 2017, actor: "Arnold Schwarzenegger", category: "Documentaire nature" },
+  { title: "Zootopie", year: 2016, actor: "Ginnifer Goodwin", category: "Animation" },
+  { title: "11.6", year: 2013, actor: "François Cluzet", category: "Thriller / Fait divers" },
+  { title: "Une rencontre", year: 2014, actor: "Sophie Marceau", category: "Romance" },
+  { title: "Une suite qui dérange : Le temps de l’action", year: 2017, actor: "Al Gore", category: "Documentaire politique / climat" },
+  { title: "USS Indianapolis", year: 2016, actor: "Nicolas Cage", category: "Guerre / Survie" },
+  { title: "Vaiana", year: 2016, actor: "Auli'i Cravalho", category: "Animation" },
+  { title: "Valérian", year: 2017, actor: "Dane DeHaan", category: "Science-fiction" },
+  { title: "Van Gogh", year: 1991, actor: "Jacques Dutronc", category: "Biopic / Drame" },
+  { title: "Vice-Versa", year: 2015, actor: "Amy Poehler", category: "Animation" },
+  { title: "Vivre dans l’époque des avions", year: 2013, actor: "Harrison Ford", category: "Documentaire aviation" },
+  { title: "Witness", year: 1985, actor: "Harrison Ford", category: "Thriller / Policier" },
+  { title: "Toy Story 4", year: 2019, actor: "Tom Hanks", category: "Animation" },
+  { title: "Trafic", year: 1971, actor: "Jacques Tati", category: "Comédie" },
+  { title: "Truth", year: 2015, actor: "Cate Blanchett", category: "Drame / Médias" },
+  { title: "Tu ne tueras point", year: 2016, actor: "Andrew Garfield", category: "Guerre" },
+  { title: "Turbo", year: 2013, actor: "Ryan Reynolds", category: "Animation" },
+  { title: "U-571", year: 2000, actor: "Matthew McConaughey", category: "Guerre" },
+  { title: "Un film inachevé", year: 2010, actor: "Archives Ghetto Varsovie", category: "Documentaire historique" },
+  { title: "Un illustre inconnu", year: 2014, actor: "Mathieu Kassovitz", category: "Thriller psychologique" },
+  { title: "Une histoire d’amour", year: 2023, actor: "Benoît Poelvoorde", category: "Drame" },
+  { title: "The Last Man on the Moon", year: 2014, actor: "Eugene Cernan", category: "Documentaire spatial" },
+  { title: "The Lighthouse", year: 2019, actor: "Willem Dafoe / Robert Pattinson", category: "Drame psychologique" },
+  { title: "The Martian", year: 2015, actor: "Matt Damon", category: "Science-fiction" },
+  { title: "The Pledge", year: 2001, actor: "Jack Nicholson", category: "Thriller" },
+  { title: "The Revenant", year: 2015, actor: "Leonardo DiCaprio", category: "Survie / Western" },
+  { title: "The VVitch", year: 2015, actor: "Anya Taylor-Joy", category: "Horreur" },
+  { title: "Tintin et le lac aux requins", year: 1972, actor: "Jacques Careuil", category: "Animation" },
+  { title: "Sing", year: 2016, actor: "Matthew McConaughey", category: "Animation" },
+  { title: "Tous en scène 2", year: 2021, actor: "Matthew McConaughey", category: "Animation" },
+  { title: "Raiponce", year: 2010, actor: "Mandy Moore", category: "Animation" },
+  { title: "Ralph", year: 2012, actor: "John C. Reilly", category: "Animation" },
+  { title: "Rango", year: 2011, actor: "Johnny Depp", category: "Animation" },
+  { title: "Raya et le dernier dragon", year: 2021, actor: "Kelly Marie Tran", category: "Animation" },
+  { title: "Rebelle", year: 2012, actor: "Kelly Macdonald", category: "Animation" },
+  { title: "Johnny Hallyday – Rester Vivant Tour", year: 2016, actor: "Johnny Hallyday", category: "Concert" },
+  { title: "Rio 2", year: 2014, actor: "Jesse Eisenberg", category: "Animation" },
+  { title: "Robinson Crusoé", year: 2016, actor: "Matthias Schweighöfer (VO)", category: "Animation" },
+  { title: "Saint Laurent", year: 2014, actor: "Gaspard Ulliel", category: "Biopic" },
+  { title: "Salaud, on t’aime", year: 2014, actor: "Johnny Hallyday", category: "Drame" },
+  { title: "Salyut 7", year: 2017, actor: "Vladimir Vdovitchenkov", category: "Espace / Drame historique" },
+  { title: "Cast Away", year: 2000, actor: "Tom Hanks", category: "Survie / Drame" },
+  { title: "Snowden", year: 2016, actor: "Joseph Gordon-Levitt", category: "Thriller politique" },
+  { title: "Leonard Cohen – Songs from the Road", year: 2010, actor: "Leonard Cohen", category: "Concert / Musique" },
+  { title: "Soul", year: 2020, actor: "Jamie Foxx", category: "Animation" },
+  { title: "Sous le sable", year: 2000, actor: "Charlotte Rampling", category: "Drame psychologique" },
+  { title: "Stalingrad", year: 1993, actor: "Thomas Kretschmann", category: "Guerre" },
+  { title: "Steve Jobs", year: 2015, actor: "Michael Fassbender", category: "Biopic" },
+  { title: "Sugarland", year: 2014, actor: "Damon Gameau", category: "Documentaire santé" },
+  { title: "Sur le toit du monde", year: 2013, actor: "Alpinistes / Expédition", category: "Documentaire aventure" },
+  { title: "The Artist", year: 2011, actor: "Jean Dujardin", category: "Comédie dramatique" },
+  { title: "The Boy", year: 2016, actor: "Lauren Cohan", category: "Horreur" },
+  { title: "The Dark Crystal", year: 1982, actor: "Jim Henson (voix)", category: "Fantasy" },
+  { title: "The Frozen Ground", year: 2013, actor: "Nicolas Cage", category: "Thriller criminel" },
+  { title: "The Game", year: 1997, actor: "Michael Douglas", category: "Thriller" },
+  { title: "The Imitation Game", year: 2014, actor: "Benedict Cumberbatch", category: "Biopic / Guerre" },
+  { title: "The Immigrant", year: 2013, actor: "Marion Cotillard", category: "Drame" },
+  { title: "Despicable Me 2", year: 2013, actor: "Steve Carell", category: "Animation" },
+  { title: "Despicable Me 2 – 3 Mini-Movie Collection", year: 2013, actor: "Minions (Pierre Coffin)", category: "Animation (courts)" },
+  { title: "Moi, moche et méchant 4", year: 2024, actor: "Steve Carell", category: "Animation" },
+  { title: "La folie des Minions – 3 Mini-Movies", year: 2015, actor: "Pierre Coffin", category: "Animation (courts)" },
+  { title: "Mon Ket", year: 2018, actor: "François Damiens", category: "Comédie" },
+  { title: "Mon Oncle", year: 1958, actor: "Jacques Tati", category: "Comédie" },
+  { title: "Money Monster", year: 2016, actor: "George Clooney", category: "Thriller" },
+  { title: "Moonwalk One", year: 1971, actor: "Astronautes Apollo 11", category: "Documentaire spatial" },
+  { title: "Mountain", year: 2017, actor: "Willem Dafoe (narrateur)", category: "Documentaire nature" },
+  { title: "Mr. Turner", year: 2014, actor: "Timothy Spall", category: "Biopic" },
+  { title: "Music Box", year: 1989, actor: "Jessica Lange", category: "Drame judiciaire" },
+  { title: "Ni juge ni soumise", year: 2017, actor: "Anne Gruwez", category: "Documentaire judiciaire" },
+  { title: "Normandie Nue", year: 2018, actor: "François Cluzet", category: "Comédie dramatique" },
+  { title: "Novitiate", year: 2017, actor: "Margaret Qualley", category: "Drame" },
+  { title: "Old", year: 2021, actor: "Gael García Bernal", category: "Thriller fantastique" },
+  { title: "Paparazzi", year: 1998, actor: "Vincent Lindon", category: "Comédie / Satire médias" },
+  { title: "Parade", year: 1974, actor: "Jacques Tati", category: "Comédie / Spectacle filmé" },
+  { title: "Pie XII – Sous le ciel de Rome", year: 2010, actor: "James Cromwell", category: "Historique / Guerre" },
+  { title: "Piper", year: 2016, actor: "—", category: "Animation (court Pixar)" },
+  { title: "Planes", year: 2013, actor: "Dane Cook", category: "Animation" },
+  { title: "Planes 2", year: 2014, actor: "Dane Cook", category: "Animation" },
+  { title: "Playtime", year: 1967, actor: "Jacques Tati", category: "Comédie" },
+  { title: "Pollen", year: 2011, actor: "Meryl Streep (narration VO)", category: "Documentaire nature" },
+  { title: "They Shall Not Grow Old", year: 2018, actor: "Soldats 14-18 (archives)", category: "Documentaire guerre" },
+  { title: "Quai d’Orsay", year: 2013, actor: "Thierry Lhermitte", category: "Comédie politique" },
+  { title: "Quai des Orfèvres", year: 1947, actor: "Louis Jouvet", category: "Policier" },
+  { title: "Quand passent les faisans", year: 1965, actor: "Paul Meurisse / Bernard Blier", category: "Comédie policière" },
+  { title: "Les adieux à la reine", year: 2012, actor: "Léa Seydoux", category: "Drame historique" },
+  { title: "Fantastic Beasts – Les animaux fantastiques", year: 2016, actor: "Eddie Redmayne", category: "Fantastique" },
+  { title: "Les aventures de Tintin : Le secret de la Licorne", year: 2011, actor: "Jamie Bell", category: "Animation / Aventure" },
+  { title: "Les huit salopards", year: 2015, actor: "Samuel L. Jackson", category: "Western" },
+  { title: "Les Indestructibles", year: 2004, actor: "Craig T. Nelson", category: "Animation" },
+  { title: "Les Indestructibles 2", year: 2018, actor: "Craig T. Nelson", category: "Animation" },
+  { title: "Minions", year: 2015, actor: "Pierre Coffin", category: "Animation" },
+  { title: "Les mondes de Ralph", year: 2012, actor: "John C. Reilly", category: "Animation" },
+  { title: "Les nouveaux héros", year: 2014, actor: "Scott Adsit", category: "Animation SF" },
+  { title: "Les petits mouchoirs", year: 2010, actor: "François Cluzet", category: "Drame amical" },
+  { title: "Les randonneurs", year: 1997, actor: "Benoît Poelvoorde", category: "Comédie" },
+  { title: "Les risques du métier", year: 1967, actor: "Jacques Brel", category: "Drame" },
+  { title: "Les saisons", year: 2015, actor: "Jacques Perrin (voix)", category: "Documentaire nature" },
+  { title: "Les saveurs du palais", year: 2012, actor: "Catherine Frot", category: "Comédie dramatique" },
+  { title: "Les tontons flingueurs", year: 1963, actor: "Lino Ventura", category: "Comédie policière" },
+  { title: "Les vacances de Monsieur Hulot", year: 1953, actor: "Jacques Tati", category: "Comédie" },
+  { title: "Les visiteurs : La Révolution", year: 2016, actor: "Christian Clavier", category: "Comédie" },
+  { title: "Madame Hyde", year: 2017, actor: "Isabelle Huppert", category: "Drame" },
+  { title: "Marie Stuart, reine d’Écosse", year: 2018, actor: "Saoirse Ronan", category: "Historique" },
+  { title: "Master and Commander", year: 2003, actor: "Russell Crowe", category: "Aventure historique / Guerre navale" },
+  { title: "Meru", year: 2015, actor: "Conrad Anker / Jimmy Chin", category: "Documentaire alpinisme" },
+  { title: "Meurtre parfait", year: 1998, actor: "Michael Douglas", category: "Thriller" },
+  { title: "Mickey – 90 ans d’enthousiasme", year: 2018, actor: "Mickey Mouse", category: "Animation / Compilation" },
+  { title: "Midnight Special", year: 2016, actor: "Michael Shannon", category: "SF / Thriller" },
+  { title: "Mission Control – The Unsung Heroes of Apollo", year: 2017, actor: "Ingénieurs NASA (témoignages)", category: "Documentaire spatial" },
+  { title: "Moi, moche et méchant", year: 2010, actor: "Steve Carell", category: "Animation" },
+  { title: "Moi, moche et méchant 3", year: 2017, actor: "Steve Carell", category: "Animation" },
+  { title: "La loi du marché", year: 2015, actor: "Vincent Lindon", category: "Drame social" },
+  { title: "La mécanique de l’ombre", year: 2016, actor: "François Cluzet", category: "Thriller d’espionnage" },
+  { title: "La mort de Louis XIV", year: 2016, actor: "Jean-Pierre Léaud", category: "Drame historique" },
+  { title: "La planète des singes : Les origines", year: 2011, actor: "Andy Serkis", category: "Science-fiction" },
+  { title: "La planète des singes", year: 2001, actor: "Mark Wahlberg", category: "Science-fiction" },
+  { title: "La prochaine fois je viserai le cœur", year: 2014, actor: "Guillaume Canet", category: "Thriller / Fait divers" },
+  { title: "La reine des neiges", year: 2013, actor: "Idina Menzel", category: "Animation" },
+  { title: "La religieuse", year: 2013, actor: "Pauline Etienne", category: "Drame" },
+  { title: "La vie et rien d’autre", year: 1989, actor: "Philippe Noiret", category: "Drame historique" },
+  { title: "Lacombe Lucien", year: 1974, actor: "Pierre Blaise", category: "Drame historique" },
+  { title: "Le juré", year: 1983, actor: "Bernard Blier", category: "Polar" },
+  { title: "Le 15:17 pour Paris", year: 2018, actor: "Alek Skarlatos / Anthony Sadler", category: "Drame / Attentat / Biopic" },
+  { title: "Capital", year: 2012, actor: "Gad Elmaleh", category: "Thriller financier" },
+  { title: "Le collier rouge", year: 2018, actor: "François Cluzet", category: "Drame historique" },
+  { title: "Le dernier loup", year: 2015, actor: "Feng Shaofeng", category: "Aventure / Nature" },
+  { title: "Le jour le plus long", year: 1962, actor: "John Wayne / Robert Mitchum", category: "Guerre (WW2)" },
+  { title: "Le juge et l’assassin", year: 1976, actor: "Philippe Noiret", category: "Drame historique / Crime" },
+  { title: "Le loup de Wall Street", year: 2013, actor: "Leonardo DiCaprio", category: "Biopic / Comédie noire" },
+  { title: "Heartbreak Ridge", year: 1986, actor: "Clint Eastwood", category: "Guerre" },
+  { title: "Le marquis", year: 2011, actor: "Franck Dubosc", category: "Comédie" },
+  { title: "Le monde de Dory", year: 2016, actor: "Ellen DeGeneres", category: "Animation" },
+  { title: "The Lost World", year: 1997, actor: "Jeff Goldblum", category: "Aventure / SF" },
+  { title: "Le nouveau stagiaire", year: 2015, actor: "Robert De Niro", category: "Comédie" },
+  { title: "Le peuple des forêts", year: 2016, actor: "Narration documentaire nature", category: "Documentaire nature" },
+  { title: "Le pianiste", year: 2002, actor: "Adrien Brody", category: "Drame historique / Shoah" },
+  { title: "Le voyage d’Arlo", year: 2015, actor: "Raymond Ochoa", category: "Animation" },
+  { title: "Leonard Cohen – Live in Dublin", year: 2014, actor: "Leonard Cohen", category: "Concert" },
+  { title: "Il Traditore", year: 2019, actor: "Pierfrancesco Favino", category: "Mafia / Biopic" },
+  { title: "Ils sont partout", year: 2016, actor: "Yvan Attal / Benoît Poelvoorde", category: "Comédie satirique" },
+  { title: "IMAX Hubble", year: 2010, actor: "Leonardo DiCaprio (narrateur)", category: "Documentaire spatial" },
+  { title: "J’accuse", year: 2019, actor: "Jean Dujardin", category: "Drame historique" },
+  { title: "Je préfère qu’on reste amis", year: 2005, actor: "Gérard Depardieu", category: "Comédie" },
+  { title: "Je suis un assassin", year: 2004, actor: "François Cluzet", category: "Thriller" },
+  { title: "Jour de fête", year: 1949, actor: "Jacques Tati", category: "Comédie" },
+  { title: "Jurassic Park", year: 1993, actor: "Sam Neill", category: "Aventure / SF" },
+  { title: "Jurassic Park III", year: 2001, actor: "Sam Neill", category: "Aventure / SF" },
+  { title: "Jurassic World", year: 2015, actor: "Chris Pratt", category: "Aventure / SF" },
+  { title: "Jurassic World – Fallen Kingdom", year: 2018, actor: "Chris Pratt", category: "Aventure / SF" },
+  { title: "Knock", year: 2017, actor: "Omar Sy", category: "Comédie" },
+  { title: "L’affaire Farewell", year: 2009, actor: "Guillaume Canet", category: "Thriller d’espionnage" },
+  { title: "L’âge de glace 3 – Le temps des dinosaures", year: 2009, actor: "Ray Romano", category: "Animation" },
+  { title: "L’âge de glace 4 – La dérive des continents", year: 2012, actor: "Ray Romano", category: "Animation" },
+  { title: "L’école buissonnière", year: 2017, actor: "François Cluzet", category: "Comédie dramatique / Nature" },
+  { title: "A Beautiful Day in the Neighborhood", year: 2019, actor: "Tom Hanks", category: "Biopic / Drame humain" },
+  { title: "A Dog’s Way Home", year: 2019, actor: "Bryce Dallas Howard (voix)", category: "Aventure familiale" },
+  { title: "L’Odyssée", year: 2016, actor: "Lambert Wilson", category: "Biopic / Aventure" },
+  { title: "L’Outsider", year: 2016, actor: "Arthur Dupont", category: "Thriller financier / Biopic Kerviel" },
+  { title: "La Belle et la Bête", year: 1991, actor: "Paige O’Hara", category: "Animation" },
+  { title: "La collection des courts-métrages Pixar 2", year: 2012, actor: "—", category: "Animation (compilation courts)" },
+  { title: "La collection des courts-métrages Pixar 1", year: 2007, actor: "—", category: "Animation (compilation courts)" },
+  { title: "La collection des courts-métrages Pixar 3", year: 2018, actor: "—", category: "Animation (compilation courts)" },
+  { title: "The Madness of King George", year: 1994, actor: "Nigel Hawthorne", category: "Historique / Drame" },
+  { title: "La guerre des boutons", year: 1962, actor: "André Treton", category: "Comédie d’enfance" },
+  { title: "La guerre des mondes", year: 2005, actor: "Tom Cruise", category: "Science-fiction" },
+  { title: "Dear Dictator", year: 2018, actor: "Michael Caine", category: "Comédie" },
+  { title: "Demolition", year: 2015, actor: "Jake Gyllenhaal", category: "Drame" },
+  { title: "Deux hommes dans la ville", year: 1973, actor: "Alain Delon / Jean Gabin", category: "Drame judiciaire" },
+  { title: "Downton Abbey", year: 2019, actor: "Hugh Bonneville", category: "Drame historique" },
+  { title: "Downton Abbey II – Une nouvelle ère", year: 2022, actor: "Hugh Bonneville", category: "Drame historique" },
+  { title: "Downton Abbey III – Le grand final", year: "", actor: "Distribution Downton Abbey", category: "Drame historique" },
+  { title: "Dunkirk", year: 2017, actor: "Fionn Whitehead", category: "Guerre" },
+  { title: "Eddy Mitchell – Big Band (Palais des Sports 2016)", year: 2016, actor: "Eddy Mitchell", category: "Concert" },
+  { title: "Elle", year: 2016, actor: "Isabelle Huppert", category: "Thriller psychologique" },
+  { title: "Elser", year: 2015, actor: "Christian Friedel", category: "Historique / Résistance" },
+  { title: "Elvis", year: 2022, actor: "Austin Butler", category: "Biopic musical" },
+  { title: "Everest", year: 2015, actor: "Jason Clarke", category: "Drame survie / Alpinisme" },
+  { title: "Exodus – Gods and Kings", year: 2014, actor: "Christian Bale", category: "Péplum biblique" },
+  { title: "Fantastic Fungi", year: 2019, actor: "Brie Larson (narration VO)", category: "Documentaire nature" },
+  { title: "First Man", year: 2018, actor: "Ryan Gosling", category: "Biopic spatial" },
+  { title: "Hallelujah – Leonard Cohen, A Journey, A Song", year: 2022, actor: "Leonard Cohen", category: "Documentaire musical" },
+  { title: "Harcèlement", year: 1994, actor: "Michael Douglas", category: "Thriller" },
+  { title: "HhhhH", year: 2017, actor: "Jason Clarke", category: "Drame historique / WW2" },
+  { title: "Home Alone (Maman, j’ai raté l’avion)", year: 1990, actor: "Macaulay Culkin", category: "Comédie familiale" },
+  { title: "Horton", year: 2008, actor: "Jim Carrey", category: "Animation" },
+  { title: "Hostiles", year: 2017, actor: "Christian Bale", category: "Western" },
+  { title: "Hotel Transylvania", year: 2012, actor: "Adam Sandler", category: "Animation" },
+  { title: "Hotel Transylvania 2", year: 2015, actor: "Adam Sandler", category: "Animation" },
+  { title: "Hotel Transylvania 3 – A Monster Vacation", year: 2018, actor: "Adam Sandler", category: "Animation" },
+  { title: "Hotel Transylvania 4 – Transformania", year: 2022, actor: "Brian Hull", category: "Animation" },
+  { title: "Ice Age – Collision Course", year: 2016, actor: "Ray Romano", category: "Animation" },
+  { title: "Once Upon a Forest", year: 2013, actor: "Narration documentaire forêt", category: "Documentaire nature" },
+  { title: "A Hologram for the King", year: 2016, actor: "Tom Hanks", category: "Comédie dramatique" },
+  { title: "À l’Ouest rien de nouveau", year: 1930, actor: "Lew Ayres", category: "Guerre" },
+  { title: "À la poursuite de demain", year: 2015, actor: "George Clooney", category: "Science-fiction / Aventure" },
+  { title: "A Royal Affair", year: 2012, actor: "Mads Mikkelsen", category: "Drame historique" },
+  { title: "Aerospace", year: "", actor: "—", category: "Documentaire technique / aviation" },
+  { title: "Alice au pays des merveilles (Disney Classiques)", year: 1951, actor: "Kathryn Beaumont", category: "Animation" },
+  { title: "Alice au pays des merveilles (Johnny Depp)", year: 2010, actor: "Johnny Depp", category: "Fantastique" },
+  { title: "Alice de l’autre côté du miroir", year: 2016, actor: "Johnny Depp", category: "Fantastique" },
+  { title: "Alice et le maire", year: 2019, actor: "Fabrice Luchini", category: "Drame politique" },
+  { title: "Alive", year: 1993, actor: "Ethan Hawke", category: "Survie / Drame inspiré de faits réels" },
+  { title: "Angry Birds – Le film", year: 2016, actor: "Jason Sudeikis", category: "Animation" },
+  { title: "Apollo 11", year: 2019, actor: "Neil Armstrong (archives)", category: "Documentaire spatial" },
+  { title: "Apollo 13", year: 1995, actor: "Tom Hanks", category: "Drame spatial / Faits réels" },
+  { title: "Au revoir là-haut", year: 2017, actor: "Nahuel Pérez Biscayart", category: "Drame historique (après 14-18)" },
+  { title: "Avatar : La voie de l’eau", year: 2022, actor: "Sam Worthington", category: "Science-fiction" },
+  { title: "Avatar", year: 2009, actor: "Sam Worthington", category: "Science-fiction" },
+  { title: "Beatrix Potter – Artist, Storyteller and Countrywoman", year: "", actor: "Beatrix Potter (archives)", category: "Documentaire biographique" },
+  { title: "Bridge of Spies", year: 2015, actor: "Tom Hanks", category: "Thriller Guerre froide" },
+  { title: "Captain Phillips", year: 2013, actor: "Tom Hanks", category: "Thriller / Prise d’otage" },
+  { title: "Cars 2", year: 2011, actor: "Owen Wilson", category: "Animation" },
+  { title: "Cars 3", year: 2017, actor: "Owen Wilson", category: "Animation" },
+  { title: "Cave of Forgotten Dreams", year: 2010, actor: "Werner Herzog", category: "Documentaire archéologie" },
+  { title: "Chute libre", year: 1993, actor: "Michael Douglas", category: "Thriller social" },
+  { title: "Colette", year: 2018, actor: "Keira Knightley", category: "Biopic" },
+  { title: "Comme des bêtes", year: 2016, actor: "Louis C.K. / Patton Oswalt", category: "Animation" },
+  { title: "Comme des bêtes 2", year: 2019, actor: "Patton Oswalt", category: "Animation" },
+  { title: "Confident Royal", year: 2017, actor: "Judi Dench", category: "Drame historique" }
+];
+
+// ====== ÉTAT COURANT ======
+let currentSortCol = null;   // "title" | "year" | "actor" | "category"
+let currentSortDir = 1;      // 1 = asc, -1 = desc
+let filteredFilms = [...films];
+
+// ====== RENDU TABLE ======
+function renderTable() {
+    const tbody = document.getElementById("filmBody");
+    tbody.innerHTML = "";
+
+    filteredFilms.forEach((f, index) => {
+        const tr = document.createElement("tr");
+
+        const tdTitle = document.createElement("td");
+        tdTitle.textContent = f.title || "";
+        tr.appendChild(tdTitle);
+
+        const tdYear = document.createElement("td");
+        tdYear.textContent = f.year !== undefined && f.year !== null ? f.year : "";
+        tdYear.className = "year-col";
+        tr.appendChild(tdYear);
+
+        const tdActor = document.createElement("td");
+        tdActor.textContent = f.actor || "";
+        tr.appendChild(tdActor);
+
+        const tdCat = document.createElement("td");
+        tdCat.textContent = f.category || "";
+        tdCat.className = "cat-col";
+        tr.appendChild(tdCat);
+
+        const tdDel = document.createElement("td");
+        tdDel.className = "del-col";
+        const btn = document.createElement("button");
+        btn.className = "del-btn";
+        btn.textContent = "🗑";
+        btn.title = "Supprimer ce film";
+        btn.addEventListener("click", () => {
+            // Supprimer dans le tableau global "films"
+            // On identifie le film exact par son objet f
+            const idxInFilms = films.indexOf(f);
+            if (idxInFilms !== -1) {
+                films.splice(idxInFilms, 1);
+            }
+            applySearchFilter(); // met à jour filteredFilms et rafraîchit le rendu
+        });
+        tdDel.appendChild(btn);
+        tr.appendChild(tdDel);
+
+        tbody.appendChild(tr);
+    });
+
+    // compteur
+    document.getElementById("countShown").textContent = filteredFilms.length;
+    document.getElementById("countTotal").textContent = films.length;
+}
+
+// ====== MISE À JOUR INDICATEUR TRI ======
+function updateSortIndicators() {
+    // retire l'état actif partout
+    document.querySelectorAll("thead th").forEach(th => th.classList.remove("active"));
+
+    if (!currentSortCol) return;
+
+    // active la bonne colonne
+    const activeTh = document.querySelector(`thead th[data-col="${currentSortCol}"]`);
+    if (activeTh) {
+        activeTh.classList.add("active");
+    }
+
+    // met la flèche ▲ ou ▼
+    document.querySelectorAll(".sort-indicator").forEach(span => {
+        const col = span.getAttribute("data-arrow-for");
+        if (col === currentSortCol) {
+            span.textContent = currentSortDir === 1 ? "▲" : "▼";
+        }
+    });
+}
+
+// ====== TRI ======
+function sortBy(col) {
+    if (currentSortCol === col) {
+        // inverse la direction
+        currentSortDir *= -1;
+    } else {
+        currentSortCol = col;
+        currentSortDir = 1;
+    }
+
+    filteredFilms.sort((a, b) => {
+        let va = a[col] ?? "";
+        let vb = b[col] ?? "";
+
+        // tri numérique pour l'année
+        if (col === "year") {
+            const na = parseInt(va) || 0;
+            const nb = parseInt(vb) || 0;
+            if (na < nb) return -1 * currentSortDir;
+            if (na > nb) return  1 * currentSortDir;
+            return 0;
+        }
+
+        // tri texte
+        va = (""+va).toLowerCase();
+        vb = (""+vb).toLowerCase();
+        if (va < vb) return -1 * currentSortDir;
+        if (va > vb) return  1 * currentSortDir;
+        return 0;
+    });
+
+    updateSortIndicators();
+    renderTable();
+}
+
+// ====== FILTRE TEXTE ======
+function applySearchFilter() {
+    const q = document.getElementById("searchInput").value.trim().toLowerCase();
+
+    if (!q) {
+        filteredFilms = [...films];
+    } else {
+        filteredFilms = films.filter(f => {
+            return (
+                (f.title    || "").toLowerCase().includes(q) ||
+                (f.actor    || "").toLowerCase().includes(q) ||
+                (f.category || "").toLowerCase().includes(q)
+            );
+        });
+    }
+
+    // après filtrage, si on avait déjà un tri en cours, on le réapplique
+    if (currentSortCol) {
+        sortBy(currentSortCol); // ça rappellera renderTable() et updateSortIndicators()
+    } else {
+        updateSortIndicators();
+        renderTable();
+    }
+}
+
+// ====== AJOUT D'UN FILM ======
+function addFilm() {
+    const titleEl = document.getElementById("newTitle");
+    const yearEl  = document.getElementById("newYear");
+    const actorEl = document.getElementById("newActor");
+    const catEl   = document.getElementById("newCat");
+
+    const title = titleEl.value.trim();
+    const year  = yearEl.value.trim();
+    const actor = actorEl.value.trim();
+    const cat   = catEl.value.trim();
+
+    if (!title) {
+        alert("Titre obligatoire 😉");
+        return;
+    }
+
+    // construit l'objet
+    const newFilm = {
+        title: title,
+        year: year ? parseInt(year) : "",
+        actor: actor,
+        category: cat
+    };
+
+    // ajoute à la base
+    films.push(newFilm);
+
+    // nettoie le formulaire
+    titleEl.value = "";
+    yearEl.value  = "";
+    actorEl.value = "";
+    catEl.value   = "";
+
+    // réapplique le filtre actuel + tri éventuel
+    applySearchFilter();
+}
+
+// ====== EVENTS ======
+document.getElementById("searchInput").addEventListener("input", applySearchFilter);
+
+document.querySelectorAll("thead th[data-col]").forEach(th => {
+    th.addEventListener("click", () => {
+        const col = th.getAttribute("data-col");
+        sortBy(col);
+    });
+});
+
+document.getElementById("addFilmBtn").addEventListener("click", addFilm);
+
+// ====== INIT ======
+applySearchFilter(); // affiche tout une première fois
+</script>
+
+</body>
+</html>
